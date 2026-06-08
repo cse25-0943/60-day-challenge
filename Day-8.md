@@ -245,3 +245,81 @@ If you found this project useful, consider giving it a star ⭐ and sharing it w
 
 Built with the goal of making environmental health data more accessible, understandable, and actionable.
 
+HTML code --
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌍 Personal Environmental Health Analyzer</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{font-family:Arial,sans-serif;background:#0f172a;color:#fff;margin:0;padding:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
+.card{background:#1e293b;padding:15px;border-radius:12px}
+h1,h2{color:#38bdf8}
+select{padding:8px;width:100%;border-radius:8px}
+canvas{background:#fff;border-radius:10px;padding:10px}
+</style>
+</head>
+<body>
+<h1>🌍 Personal Environmental Health Analyzer</h1>
+<p>Demo dataset populated with recent AQI references for major Indian cities and Delhi water-quality indicators.</p>
+
+<div class="grid">
+<div class="card"><h3>Avg AQI</h3><div id="avg"></div></div>
+<div class="card"><h3>Highest AQI</h3><div id="high"></div></div>
+<div class="card"><h3>Lowest AQI</h3><div id="low"></div></div>
+<div class="card"><h3>Cities Analyzed</h3><div id="count"></div></div>
+</div>
+
+<div class="card">
+<h2>City Selector</h2>
+<select id="city"></select>
+<div id="details"></div>
+</div>
+
+<div class="card"><canvas id="aqiChart"></canvas></div>
+
+<script>
+const data=[
+{name:"Delhi",aqi:102,pm25:86,pm10:90,water:45},
+{name:"Mumbai",aqi:107,pm25:88,pm10:92,water:60},
+{name:"Lucknow",aqi:108,pm25:95,pm10:100,water:55},
+{name:"Bengaluru",aqi:16,pm25:16,pm10:35,water:82},
+{name:"Chennai",aqi:26,pm25:45,pm10:57,water:78},
+{name:"Jaipur",aqi:28,pm25:30,pm10:40,water:72}
+];
+
+const avg=(data.reduce((a,b)=>a+b.aqi,0)/data.length).toFixed(1);
+document.getElementById('avg').innerText=avg;
+document.getElementById('high').innerText=data.sort((a,b)=>b.aqi-a.aqi)[0].name;
+document.getElementById('low').innerText=data.sort((a,b)=>a.aqi-b.aqi)[0].name;
+document.getElementById('count').innerText=data.length;
+
+const citySel=document.getElementById('city');
+data.forEach(c=>citySel.innerHTML+=`<option>${c.name}</option>`);
+
+function renderCity(){
+const c=data.find(x=>x.name===citySel.value);
+const score=Math.round((100-c.aqi/2 + c.water)/2);
+document.getElementById('details').innerHTML=`
+<h3>${c.name}</h3>
+<p>AQI: ${c.aqi}</p>
+<p>PM2.5: ${c.pm25}</p>
+<p>PM10: ${c.pm10}</p>
+<p>Water Quality Score: ${c.water}/100</p>
+<p>Environmental Health Score: ${score}/100</p>`;
+}
+citySel.onchange=renderCity; renderCity();
+
+new Chart(document.getElementById('aqiChart'),{
+type:'bar',
+data:{labels:data.map(x=>x.name),
+datasets:[{label:'AQI',data:data.map(x=>x.aqi)}]}
+});
+</script>
+</body>
+</html>
+
